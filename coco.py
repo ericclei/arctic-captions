@@ -154,7 +154,7 @@ def load_data(load_train=True, load_dev=True, load_test=True, path='./data/'):
         test_feat = test_feat.astype(numpy.float32)
         test = (test_cap, test_feat)
 
-    with open(path+'coco_dictionary.pkl', 'rb') as f:
+    with open('./data/coco_dictionary.pkl', 'rb') as f:
         worddict = pkl.load(f)
 
 
