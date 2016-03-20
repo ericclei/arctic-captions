@@ -35,7 +35,7 @@ def gen_model(idx, context, model, options, k, normalize, word_idict, sampling, 
     return (idx, seq)
 
 
-def main(model, saveto, k=5, normalize=False, zero_pad=False, datasets='test', sampling=False, pkl_name=None):
+def main(model, saveto, k=5, normalize=False, zero_pad=False, datasets='dev,test', sampling=False, pkl_name=None):
 # load model model_options
     if pkl_name is None:
         pkl_name = model
