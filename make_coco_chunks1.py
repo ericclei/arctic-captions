@@ -10,6 +10,7 @@ import pdb
 from pycocotools.coco import COCO
 from pycocoevalcap.eval import COCOEvalCap
 import requests
+import sys
 
 #Create the CNN, using the 19 layers CNN
 vgg_deploy_path = '../VGG_ILSVRC_19_layers_deploy.prototxt'
@@ -72,6 +73,8 @@ testidx = 0
 for img in imgs:
     thetype = whatType[img['file_name']]
     if thetype == "train":
+        if img['id'] != 57870:
+            continue
         trainImgs.append(img)
         train_id2idx[img['id']] = trainidx
         trainidx += 1
@@ -85,6 +88,9 @@ for img in imgs:
         test_id2idx[img['id']] = testidx
         testidx += 1
 
+#trainImgs = trainImgs[:10000]
+#valImgs = []
+#testImgs = []
 
 #Go through annotations. Itoa is a dictionary
 #taking in an image ID and returning 5 annotations
@@ -138,8 +144,9 @@ def processImgList(theList,basefn):
         Feat = np.empty((batch_size,512*14*14))
         for i in xrange(batch_size):
             fn = image_files[i].rstrip()
-            if True:#i%100==0:
+            if i%10==0:
                 print fn, i+1, '/', len(theList)
+                sys.stdout.flush()
             net.blobs['data'].data[...] = transformer.preprocess('data',caffe.io.load_image(fn))
             out = net.forward()
             feat = net.blobs['conv5_4'].data[0]
@@ -171,15 +178,17 @@ def processImgList(theList,basefn):
 
 print('train now')
 train_feats = processImgList(trainImgs,'./data/coco_align.train')
-with open('./data/coco_align1.train.pkl', 'wb') as f:
+with open('./data/coco_align.train.pkl', 'wb') as f:
     cPickle.dump(cap_train, f,protocol=cPickle.HIGHEST_PROTOCOL)
 
+"""
 print('val now')
-val_feats = processImgList(valImgs,'./data/coco_align.val')
+val_feats = processImgList(valImgs,'./data/coco_align1.val')
 with open('./data/coco_align1.val.pkl', 'wb') as f:
     cPickle.dump(cap_val, f,protocol=cPickle.HIGHEST_PROTOCOL)
 
 print('test now')
-test_feats = processImgList(testImgs,'./data/coco_align.test')
+test_feats = processImgList(testImgs,'./data/coco_align1.test')
 with open('./data/coco_align1.test.pkl', 'wb') as f:
     cPickle.dump(cap_test, f,protocol=cPickle.HIGHEST_PROTOCOL)
+"""
