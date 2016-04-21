@@ -4,6 +4,7 @@ import cPickle as pkl
 import pdb
 from capgen import init_params, get_dataset, build_sampler, gen_sample
 from util import load_params, init_tparams
+import sys
 
 # single instance of a sampling process
 def gen_model(idx, context, model, options, k, normalize, word_idict, sampling, params, tparams):
@@ -77,7 +78,8 @@ def main(model, saveto, k=5, normalize=False, zero_pad=False, datasets='dev,test
     def _process_examples(contexts, params, tparams):
         caps = [None] * contexts.shape[0]
         for idx, ctx in enumerate(contexts):
-            cc = ctx.todense().reshape([14*14,512])
+            cc = ctx.todense().reshape([5,4122])
+            #cc = ctx.todense().reshape([14*14,512])
             if zero_pad:
                 cc0 = numpy.zeros((cc.shape[0]+1, cc.shape[1])).astype('float32')
                 cc0[:-1,:] = cc
@@ -87,6 +89,7 @@ def main(model, saveto, k=5, normalize=False, zero_pad=False, datasets='dev,test
             caps[resp[0]] = resp[1]
             print 'Sample ', (idx+1), '/', contexts.shape[0], ' Done'
             print resp[1]
+            sys.stdout.flush()
         return caps
 
     ds = datasets.strip().split(',')
@@ -95,7 +98,8 @@ def main(model, saveto, k=5, normalize=False, zero_pad=False, datasets='dev,test
     for dd in ds:
         if dd == 'train':
             print 'Training Set...',
-            caps = _seqs2words(_process_examples(train[1], params, tparams))
+            new_train = train[1][:2000]
+            caps = _seqs2words(_process_examples(new_train, params, tparams))
             # import pdb; pdb.set_trace()
             with open(saveto+'.train.txt', 'w') as f:
                 print >>f, '\n'.join(caps)
@@ -109,7 +113,7 @@ def main(model, saveto, k=5, normalize=False, zero_pad=False, datasets='dev,test
             print 'Done'
         if dd == 'test':
             print 'Test Set...',
-            caps = _seqs2words(_process_examples(test[1], params, tparams))
+            caps = _seqs2words(_process_examples(test[1][:1000], params, tparams)) # subset
             with open(saveto+'.test.txt', 'w') as f:
                 print >>f, '\n'.join(caps)
             print 'Done'

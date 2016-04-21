@@ -101,7 +101,8 @@ def main(model, saveto, k=5, normalize=False, zero_pad=False, n_process=5, datas
     # unsparsify, reshape, and queue
     def _send_jobs(contexts):
         for idx, ctx in enumerate(contexts):
-            cc = ctx.todense().reshape([14*14,512])
+            #cc = ctx.todense().reshape([14*14,512])
+            cc = ctx.todense().reshape([5,4122])
             if zero_pad:
                 cc0 = numpy.zeros((cc.shape[0]+1, cc.shape[1])).astype('float32')
                 cc0[:-1,:] = cc
@@ -126,14 +127,16 @@ def main(model, saveto, k=5, normalize=False, zero_pad=False, n_process=5, datas
         if dd == 'dev':
             print 'Development Set...',
             _send_jobs(valid[1])
-            caps = _seqs2words(_retrieve_jobs(len(valid[1])))
+            #caps = _seqs2words(_retrieve_jobs(len(valid[1])))
+            caps = _seqs2words(_retrieve_jobs(valid[1].shape[0]))
+
             with open(saveto+'.dev.txt', 'w') as f:
                 print >>f, '\n'.join(caps)
             print 'Done'
         if dd == 'test':
             print 'Test Set...',
             _send_jobs(test[1])
-            caps = _seqs2words(_retrieve_jobs(len(test[1])))
+            caps = _seqs2words(_retrieve_jobs(test[1].shape[0]))
             with open(saveto+'.test.txt', 'w') as f:
                 print >>f, '\n'.join(caps)
             print 'Done'

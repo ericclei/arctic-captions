@@ -63,7 +63,8 @@ def prepare_data(caps, features, worddict, maxlen=None, n_words=10000, zero_pad=
     for idx, ff in enumerate(feat_list):
         y[idx,:] = numpy.array(ff.todense())
         #y[idx,:] = numpy.array(ff)
-    y = y.reshape([y.shape[0], 14*14, 512])
+    y = y.reshape([y.shape[0], 5, 4122])
+    #y = y.reshape([y.shape[0], 14*14, 512])
     if zero_pad:
         y_pad = numpy.zeros((y.shape[0], y.shape[1]+1, y.shape[2])).astype('float32')
         y_pad[:,:-1,:] = y
@@ -97,7 +98,7 @@ def load_data(load_train=True, load_dev=True, load_test=True, path='./data/'):
     valid = None
     test = None
 
-    num_trains = 12
+    num_trains = 9
     num_devs = 1
     num_tests = 1
 
@@ -107,17 +108,22 @@ def load_data(load_train=True, load_dev=True, load_test=True, path='./data/'):
             train_cap = pkl.load(f)
             #train_feat = pkl.load(f)
 
-        with open('./data/coco_align.train0.pkl', 'rb') as f:
+        """
+        with open('./data/coco_align.train.pkl', 'rb') as f:
+        #with open('./data/coco_align.train0.pkl', 'rb') as f:
             train_feat = pkl.load(f)
             train_feat = train_feat.tocsr()
         print "trainfeat", train_feat.shape
-        for t in range(1,num_trains):
+        """
+        for t in range(num_trains):
 
             with open('./data/coco_align.train' + str(t) + '.pkl', 'rb') as f:
                 tempfeat = pkl.load(f)
             tempfeat = tempfeat.tocsr()
-            print "tempfeat", tempfeat.shape
-            train_feat = scipy.sparse.vstack([train_feat, tempfeat],format="csr")
+            if t == 0:
+                train_feat = tempfeat
+            else:
+                train_feat = scipy.sparse.vstack([train_feat, tempfeat],format="csr")
         train_feat = train_feat.astype(numpy.float32)
         train = (train_cap, train_feat)
 
@@ -126,14 +132,19 @@ def load_data(load_train=True, load_dev=True, load_test=True, path='./data/'):
             dev_cap = pkl.load(f)
             #dev_feat = pkl.load(f)
 
-        with open('./data/coco_align.val0.pkl', 'rb') as f:
+        """
+        with open('./data/coco_align.val.pkl', 'rb') as f:
             dev_feat = pkl.load(f)
         dev_feat = dev_feat.tocsr()
-        for t in range(1,num_devs):
+        """
+        for t in range(num_devs):
             with open('./data/coco_align.val' + str(t) + '.pkl', 'rb') as f:
                 tempfeat = pkl.load(f)
             tempfeat = tempfeat.tocsr()
-            dev_feat = scipy.sparse.vstack([dev_feat, tempfeat],format="csr")
+            if t == 0:
+                dev_feat = tempfeat
+            else:
+                dev_feat = scipy.sparse.vstack([dev_feat, tempfeat],format="csr")
         dev_feat = dev_feat.astype(numpy.float32)
         valid = (dev_cap, dev_feat)
 
@@ -142,15 +153,20 @@ def load_data(load_train=True, load_dev=True, load_test=True, path='./data/'):
             test_cap = pkl.load(f)
             #test_feat = pkl.load(f)
         
-        with open('./data/coco_align.test0.pkl', 'rb') as f:
+        """
+        with open('./data/coco_align.test.pkl', 'rb') as f:
             test_feat = pkl.load(f)
         test_feat = test_feat.tocsr()
+        """
 
-        for t in range(1,num_tests):
+        for t in range(num_tests):
             with open('./data/coco_align.test' + str(t) + '.pkl', 'rb') as f:
                 tempfeat = pkl.load(f)
             tempfeat = tempfeat.tocsr()
-            test_feat = scipy.sparse.vstack([test_feat, tempfeat],format="csr")
+            if t == 0:
+                test_feat = tempfeat
+            else:
+                test_feat = scipy.sparse.vstack([test_feat, tempfeat],format="csr")
         test_feat = test_feat.astype(numpy.float32)
         test = (test_cap, test_feat)
 

@@ -55,7 +55,7 @@ if __name__ == "__main__":
     defaults = {"model": "hard_model.npz",
                 "attn-type": "stochastic",
                 "dim-word": 512,
-                "ctx-dim": 512,
+                "ctx-dim": 4122,
                 "dim": 1800,
                 "n-layers-att": 2,
                 "n-layers-out": 1,

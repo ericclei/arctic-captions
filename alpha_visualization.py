@@ -20,6 +20,8 @@ from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 import cPickle as pkl
 import numpy
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
@@ -37,6 +39,7 @@ import generate_caps as gencaps
 import flickr8k
 import flickr30k
 import coco
+import sys
 
 print 'finished imports'
 
@@ -49,7 +52,7 @@ datasets = {'flickr8k': (flickr8k.load_data, flickr8k.prepare_data),
              'coco': (coco.load_data, coco.prepare_data)}
 
 # location of the model file, the pkl file should be named "model_name.npz.pkl"
-model= 'my_caption_model.npz'
+model= 'hard_model.npz'
 # location of the devset split file like the ones in /splits
 dev_list = './splits/coco_val.txt' 
 image_path = '../val2014/'
@@ -146,17 +149,21 @@ if options['selector']:
 # In[45]:
 
 print 'making images'
-n_img = 50
-for i_img in xrange(n_img):
-    print i_img, '/', n_img
-    idx = numpy.random.randint(0, len(valid[0])) # random image
+plt.figure()
+#for idx in xrange(0,500,5):
+#for idx in [83*5]:
+the_data = valid
+for idx in xrange(0,len(the_data[0]),5):
+    #idx = numpy.random.randint(0, len(the_data[0])) # random image
     k = 1 # beam width
     use_gt = False # set to False if you want to use the generated sample
-    gt = valid[0][idx][0] # groundtruth
-    context = numpy.array(valid[1][valid[0][idx][1]].todense()).reshape([14*14, 512]) # annotations
-    path_to_file = image_path+flist[valid[0][idx][1]]
+    gt = the_data[0][idx][0] # groundtruth
+    context = numpy.array(the_data[1][the_data[0][idx][1]].todense()).reshape([14*14, 512]) # annotations
+    path_to_file = image_path+flist[the_data[0][idx][1]]
+    image_no = flist[the_data[0][idx][1]]
     img = LoadImage(path_to_file)
-    print path_to_file
+    print idx/5, '/', len(flist), '--', image_no
+    sys.stdout.flush()
 
 
     # In[46]:
@@ -176,6 +183,7 @@ for i_img in xrange(n_img):
     words = map(lambda w: word_idict[w] if w in word_idict else '<UNK>', caption)
     print 'Sample:', ' '.join(words)
     print 'GT:', gt
+    sample = ' '.join(words)
 
 
     # In[48]:
@@ -194,11 +202,17 @@ for i_img in xrange(n_img):
     # In[49]:
 
     # display the visualization
+    plt.clf()
+    plt.title('Actual: ' + gt + '\n' + 'Generated: ' + sample,fontsize=10)
+    plt.imshow(img)
+    plt.axis('off')
+
+    """
     n_words = alpha.shape[0] + 1
     w = numpy.round(numpy.sqrt(n_words))
     h = numpy.ceil(numpy.float32(n_words) / w)
-            
     plt.subplot(w, h, 1)
+    #plt.text(-20,-50,gt,fontsize=10)
     plt.imshow(img)
     plt.axis('off')
 
@@ -220,4 +234,7 @@ for i_img in xrange(n_img):
         plt.set_cmap(cm.Greys_r)
         plt.axis('off')
     plt.show()
-    plt.savefig(i_img + '.png')
+    """
+
+    plt.savefig('captioned_images_hard/' + str(image_no))
+

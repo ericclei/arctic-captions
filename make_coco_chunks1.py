@@ -73,8 +73,8 @@ testidx = 0
 for img in imgs:
     thetype = whatType[img['file_name']]
     if thetype == "train":
-        if img['id'] != 57870:
-            continue
+        #if img['id'] != 57870:
+            #continue
         trainImgs.append(img)
         train_id2idx[img['id']] = trainidx
         trainidx += 1
@@ -152,25 +152,25 @@ def processImgList(theList,basefn):
             feat = net.blobs['conv5_4'].data[0]
             reshapeFeat = np.reshape(np.swapaxes(feat,0,2),(1,-1))
             Feat[i,:] = reshapeFeat
-            #feat = cnn.get_features(image_list=image_files, layers='conv5_4', layer_sizes=[512,14,14])
         if numPics % batch_size == 0: #reset!
             featStacks = scipy.sparse.csr_matrix(np.array(map(lambda x: x.flatten(), Feat)).astype('float32'))
         else:
             featStacks = scipy.sparse.vstack([featStacks, scipy.sparse.csr_matrix(np.array(map(lambda x: x.flatten(), Feat)).astype('float32'))],format="csr")
         
-        numPics += 1
+        numPics += batch_size
 
         if numPics % batch_size == 0:
-            newfn = basefn + str(batchNum) + '.pkl'
-            #newfn = basefn + '.pkl'
+            X = [featStacks[i,] for i in xrange(featStacks.shape[0])]
+            #newfn = basefn + str(batchNum) + '.pkl'
+            newfn = basefn + '.pkl'
             with open(newfn,'wb') as f:
                 cPickle.dump(featStacks, f,protocol=cPickle.HIGHEST_PROTOCOL)
                 print("Success!")
             batchNum += 1
 
     if numPics % batch_size != 0:
-        newfn = basefn + str(batchNum) + '.pkl'
-        #newfn = basefn + '.pkl'
+        #newfn = basefn + str(batchNum) + '.pkl'
+        newfn = basefn + '.pkl'
         with open(newfn,'wb') as f:
             cPickle.dump(featStacks, f,protocol=cPickle.HIGHEST_PROTOCOL)
     return featStacks

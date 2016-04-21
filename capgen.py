@@ -18,6 +18,7 @@ import numpy
 import copy
 import os
 import time
+import sys
 
 from collections import OrderedDict
 from sklearn.cross_validation import KFold
@@ -92,7 +93,7 @@ def _p(pp, name):
 def init_tparams(params):
     tparams = OrderedDict()
     for kk, pp in params.iteritems():
-        tparams[kk] = theano.shared(params[kk], name=kk)
+        tparams[kk] = theano.shared(params[kk], name=kk, borrow=True)
     return tparams
 
 # load parameters
@@ -1064,7 +1065,8 @@ def validate_options(options):
        4. With some helper functions, gradient descent + periodic saving/printing proceeds
 """
 def train(dim_word=100,  # word vector dimensionality
-          ctx_dim=512,  # context vector dimensionality
+          ctx_dim=4122,  # context vector dimensionality
+          #ctx_dim=512,  # context vector dimensionality
           dim=1000,  # the number of LSTM units
           attn_type='stochastic',  # [see section 4 from paper]
           n_layers_att=1,  # number of layers used to compute the attention weights
@@ -1278,6 +1280,7 @@ def train(dim_word=100,  # word vector dimensionality
             if numpy.mod(uidx, dispFreq) == 0:
                 print 'Epoch ', eidx, 'Update ', uidx, 'Cost ', cost, 'PD ', pd_duration, 'UD ', ud_duration
 
+            sys.stdout.flush()
             # Checkpoint
             if numpy.mod(uidx, saveFreq) == 0:
                 print 'Saving...',

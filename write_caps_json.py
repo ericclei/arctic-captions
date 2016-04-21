@@ -8,11 +8,13 @@ caps_file = sys.argv[1]
 splits_file = sys.argv[2]
 
 with open(splits_file,'r') as f:
-    image_ids = [int(x[13:-4]) for x in f.read().splitlines()]
+    image_ids = [int(x[15:-4]) for x in f.read().splitlines()]
 with open(caps_file,'r') as f:
     captions = [x for x in f.read().splitlines()]
+
+image_ids = image_ids[:1000]
 if len(image_ids) != len(captions):
-    print 'numbers of images and captions do not match'
+    print 'numbers of images {} and captions {} do not match'.format(len(image_ids), len(captions))
     
     
 result = [{'image_id':x, 'caption':y} for (x,y) in zip(image_ids, captions)] 

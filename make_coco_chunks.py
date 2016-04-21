@@ -55,6 +55,7 @@ train = json.load(open(t_annFile, 'r'))
 imgs = val['images'] + train['images']
 annots = val['annotations'] + train['annotations']
 
+
 trainImgs = []
 valImgs = []
 testImgs = []
@@ -71,6 +72,8 @@ testidx = 0
 for img in imgs:
     thetype = whatType[img['file_name']]
     if thetype == "train":
+        if img['id'] == 57870:
+            print trainidx
         trainImgs.append(img)
         train_id2idx[img['id']] = trainidx
         trainidx += 1
@@ -124,7 +127,7 @@ def getFilename(imgobj):
 
 #Processes the CNN features
 def processImgList(theList,basefn):
-    batch_size = 100
+    batch_size = len(theList)
     numPics = 0
     batchNum = 0
 
@@ -137,13 +140,15 @@ def processImgList(theList,basefn):
         else:
             featStacks = scipy.sparse.vstack([featStacks, scipy.sparse.csr_matrix(np.array(map(lambda x: x.flatten(), feat)))],format="csr")
         
-        numPics += 1
+        numPics += batch_size
 
         if numPics % batch_size == 0:
+            X = [featStacks[i,] for i in xrange(featStacks.shape[0])]
             newfn = basefn + str(batchNum) + '.pkl'
             #newfn = basefn + '.pkl'
             with open(newfn,'wb') as f:
-                cPickle.dump(featStacks, f,protocol=cPickle.HIGHEST_PROTOCOL)
+                #cPickle.dump(featStacks, f,protocol=cPickle.HIGHEST_PROTOCOL)
+                cPickle.dump(X, f,protocol=cPickle.HIGHEST_PROTOCOL)
                 print("Success!")
             batchNum += 1
 
@@ -161,6 +166,7 @@ train_feats = processImgList(trainImgs,'./data/coco_align.train')
 with open('./data/coco_align.train.pkl', 'wb') as f:
     cPickle.dump(cap_train, f,protocol=cPickle.HIGHEST_PROTOCOL)
 
+"""
 print('val now')
 val_feats = processImgList(valImgs,'./data/coco_align.val')
 with open('./data/coco_align.val.pkl', 'wb') as f:
@@ -170,3 +176,4 @@ print('test now')
 test_feats = processImgList(testImgs,'./data/coco_align.test')
 with open('./data/coco_align.test.pkl', 'wb') as f:
     cPickle.dump(cap_test, f,protocol=cPickle.HIGHEST_PROTOCOL)
+"""
